@@ -765,4 +765,65 @@
         app:layout_constraintStart_toEndOf="@+id/attack_result_text_view"
         app:layout_constraintTop_toBottomOf="@+id/defense_die_1" />
 
+    <ImageView
+        android:id="@+id/current_player_graphic"
+        android:layout_width="70dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="288dp"
+        android:layout_marginTop="162dp"
+        android:background="@color/blue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/change_phase_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="316dp"
+        android:layout_marginTop="308dp"
+        android:text="Change Phase"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/phase_text_view"
+        android:layout_width="77dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="544dp"
+        android:layout_marginTop="320dp"
+        android:text="TextView"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/gamePhase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="736dp"
+        android:layout_marginTop="210dp"
+        android:text="Game Phase"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/game_phase_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="792dp"
+        android:layout_marginTop="171dp"
+        android:text="TextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/end_attack_button"
+        android:layout_width="77dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="146dp"
+        android:layout_marginTop="312dp"
+        android:text="End"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

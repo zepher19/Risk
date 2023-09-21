@@ -9,104 +9,132 @@ import java.util.Random;
 
 public class BoardModel {
 
-    private Region[] regionArray;
+    private final String[] turnPhases = {"Reinforce", "Attack", "Fortify"};
+    private String currentPhase = "Reinforce";
+
+
+    private final String[] gamePhases = {"Setup", "Play"};
+    private String currentGamePhase = "Setup";
+
+
+    private final Region[] regionArray;
 
     private char currentPlayerTurn;
 
-    private char[] players;
-
-
-    private Region alaskaReg, north_west_territoryReg, albertaReg, ontarioReg, quebecReg,
-            western_united_statesReg, eastern_united_statesReg, central_americaReg,
-            greenlandReg, venezuelaReg, peruReg, brazilReg, argentinaReg, icelandReg, scandinaviaReg,
-            great_britainReg, western_europeReg, northern_europeReg, southern_europeReg,
-            ukraineReg, north_africaReg, egyptReg, east_africaReg, congoReg, south_africaReg,
-            madagascarReg, middle_eastReg, afghanistanReg, uralReg, siberiaReg, yakutskReg,
-            kamchatkaReg, japanReg, irkutskReg, mongoliaReg, chinaReg, indiaReg, siamReg, indonesiaReg, new_guineaReg,
-            western_australiaReg, eastern_australiaReg;
-
-
-    private String alaska, north_west_territory, alberta, ontario, quebec,
-            western_united_states, eastern_united_states, central_america,
-            greenland, venezuela, peru, brazil, argentina, iceland, scandinavia,
-            great_britain, western_europe, northern_europe, southern_europe,
-            ukraine, north_africa, egypt, east_africa, congo, south_africa,
-            madagascar, middle_east, afghanistan, ural, siberia, yakutsk,
-            kamchatka, japan, irkutsk, mongolia, china, india, siam, indonesia, new_guinea,
-            western_australia, eastern_australia;
+    private final char[] players = {'b', 'o', 'p', 'g'};
 
 
     private static final BoardModel instance = new BoardModel();
 
     // private constructor to avoid client applications using the constructor
     private BoardModel(){
-        alaska = "ALASKA";
-        north_west_territory = "NORTH WEST TERRITORY";
-        alberta = "ALBERTA";
-        ontario = "ONTARIO";
-        quebec = "QUEBEC";
-        western_united_states = "WESTERN UNITED STATES";
-        eastern_united_states = "EASTERN UNITED STATES";
-        central_america = "CENTRAL AMERICA";
-        greenland = "GREENLAND";
-        venezuela = "VENEZUELA";
-        peru = "PERU";
-        brazil = "BRAZIL";
-        argentina = "ARGENTINA";
-        iceland = "ICELAND";
-        scandinavia = "SCANDINAVIA";
-        great_britain = "GREAT BRITAIN";
-        western_europe = "WESTERN EUROPE";
-        northern_europe = "NORTHERN EUROPE";
-        southern_europe = "SOUTHERN EUROPE";
-        ukraine = "UKRAINE";
-        north_africa = "NORTH AFRICA";
-        egypt = "EGYPT";
-        east_africa = "EAST AFRICA";
-        congo = "CONGO";
-        south_africa = "SOUTH AFRICA";
-        madagascar = "MADAGASCAR";
-        middle_east = "MIDDLE EAST";
-        afghanistan = "AFGHANISTAN";
-        ural = "URAL";
-        siberia = "SIBERIA";
-        yakutsk = "YAKUTSK";
-        kamchatka = "KAMCHATKA";
-        japan = "JAPAN";
-        irkutsk = "IRKUTSK";
-        mongolia = "MONGOLIA";
-        china = "CHINA";
-        india = "INDIA";
-        siam = "SIAM";
-        indonesia = "INDONESIA";
-        new_guinea = "NEW GUINEA";
-        western_australia = "WESTERN AUSTRALIA";
-        eastern_australia = "EASTERN AUSTRALIA";
 
-        //initialize all regions with connections and View ID
-        alaskaReg = new Region(new String[]{north_west_territory, alberta, kamchatka}, R.id.alaska);
-        north_west_territoryReg = new Region(new String[]{alaska, alberta, ontario, greenland}, R.id.north_west_territory);
-        albertaReg = new Region(new String[]{alaska, north_west_territory, ontario, western_united_states}, R.id.alberta);
-        ontarioReg = new Region(new String[]{north_west_territory, alberta, western_united_states, eastern_united_states, quebec, greenland}, R.id.ontario);
-        quebecReg = new Region(new String[]{ontario, eastern_united_states, greenland}, R.id.quebec);
-        greenlandReg = new Region(new String[]{iceland, quebec, ontario, north_west_territory}, R.id.greenland);
-        western_united_statesReg = new Region(new String[]{alberta, ontario, eastern_united_states, central_america}, R.id.western_united_states);
-        eastern_united_statesReg = new Region(new String[]{western_united_states, central_america, quebec, ontario}, R.id.eastern_united_states);
-        central_americaReg = new Region(new String[]{western_united_states, eastern_united_states, venezuela}, R.id.central_america);
+        //initialize all regions with View ID
+        Region alaskaReg = new Region(R.id.alaska);
+        Region north_west_territoryReg = new Region (R.id.north_west_territory);
+        Region albertaReg = new Region(R.id.alberta);
+        Region ontarioReg = new Region(R.id.ontario);
+        Region quebecReg = new Region(R.id.quebec);
+        Region greenlandReg = new Region(R.id.greenland);
+        Region western_united_statesReg = new Region(R.id.western_united_states);
+        Region eastern_united_statesReg = new Region(R.id.eastern_united_states);
+        Region central_americaReg = new Region(R.id.central_america);
+
+        Region venezuelaReg = new Region(R.id.venezuela);
+        Region peruReg = new Region(R.id.peru);
+        Region brazilReg = new Region(R.id.brazil);
+        Region argentinaReg = new Region(R.id.argentina);
+
+        Region icelandReg = new Region(R.id.iceland);
+        Region great_britainReg = new Region(R.id.great_britain);
+        Region scandinaviaReg = new Region(R.id.scandinavia);
+        Region ukraineReg = new Region(R.id.ukraine);
+        Region northern_europeReg = new Region(R.id.northern_europe);
+        Region southern_europeReg = new Region(R.id.southern_europe);
+        Region western_europeReg = new Region(R.id.western_europe);
+
+        Region north_africaReg = new Region(R.id.north_africa);
+        Region egyptReg = new Region(R.id.egypt);
+        Region east_africaReg = new Region(R.id.east_africa);
+        Region congoReg = new Region(R.id.congo);
+        Region south_africaReg = new Region(R.id.south_africa);
+        Region madagascarReg = new Region(R.id.madagascar);
+
+        Region middle_eastReg = new Region(R.id.middle_east);
+        Region afghanistanReg = new Region(R.id.afghanistan);
+        Region uralReg = new Region(R.id.ural);
+        Region siberiaReg = new Region(R.id.siberia);
+        Region yakutskReg = new Region(R.id.yakutsk);
+        Region kamchatkaReg = new Region(R.id.kamchatka);
+        Region japanReg = new Region(R.id.japan);
+        Region irkutskReg = new Region(R.id.irkutsk);
+        Region mongoliaReg = new Region(R.id.mongolia);
+        Region chinaReg = new Region(R.id.china);
+        Region indiaReg = new Region(R.id.india);
+        Region siamReg = new Region(R.id.siam);
+
+        Region indonesiaReg = new Region(R.id.indonesia);
+        Region new_guineaReg = new Region(R.id.new_guinea);
+        Region western_australiaReg = new Region(R.id.western_australia);
+        Region eastern_australiaReg = new Region(R.id.eastern_australia);
 
 
-        venezuelaReg = new Region(new String[]{central_america, peru, brazil}, R.id.venezuela);
-        peruReg = new Region(new String[]{venezuela, argentina, brazil}, R.id.peru);
-        brazilReg = new Region(new String[]{venezuela, peru, argentina, north_africa}, R.id.brazil);
-        argentinaReg = new Region(new String[]{peru, brazil}, R.id.argentina);
+        //set connected Regions
+        alaskaReg.setConnected(new Region[]{north_west_territoryReg, albertaReg, kamchatkaReg});
+        north_west_territoryReg.setConnected(new Region[]{alaskaReg, albertaReg, ontarioReg, greenlandReg});
+        albertaReg.setConnected(new Region[]{alaskaReg, north_west_territoryReg, ontarioReg, western_united_statesReg});
+        ontarioReg.setConnected(new Region[]{north_west_territoryReg, albertaReg, western_united_statesReg, eastern_united_statesReg, quebecReg, greenlandReg});
+        quebecReg.setConnected(new Region[]{ontarioReg, eastern_united_statesReg, greenlandReg});
+        greenlandReg.setConnected(new Region[]{icelandReg, quebecReg, ontarioReg, north_west_territoryReg});
+        western_united_statesReg.setConnected(new Region[]{albertaReg, ontarioReg, eastern_united_statesReg, central_americaReg});
+        eastern_united_statesReg.setConnected(new Region[]{western_united_statesReg, central_americaReg, quebecReg, ontarioReg});
+        central_americaReg.setConnected(new Region[]{western_united_statesReg, eastern_united_statesReg, venezuelaReg});
 
+        venezuelaReg.setConnected(new Region[]{central_americaReg, peruReg, brazilReg});
+        peruReg.setConnected(new Region[]{venezuelaReg, argentinaReg, brazilReg});
+        brazilReg.setConnected(new Region[]{venezuelaReg, peruReg, argentinaReg, north_africaReg});
+        argentinaReg.setConnected(new Region[]{peruReg, brazilReg});
 
+        icelandReg.setConnected(new Region[]{greenlandReg, great_britainReg, scandinaviaReg});
+        great_britainReg.setConnected(new Region[]{icelandReg, western_europeReg, northern_europeReg, scandinaviaReg});
+        scandinaviaReg.setConnected(new Region[]{icelandReg, great_britainReg, ukraineReg, northern_europeReg});
+        ukraineReg.setConnected(new Region[]{uralReg, afghanistanReg, middle_eastReg, northern_europeReg, southern_europeReg, scandinaviaReg});
+        northern_europeReg.setConnected(new Region[]{scandinaviaReg, ukraineReg, southern_europeReg, western_europeReg, great_britainReg});
+        southern_europeReg.setConnected(new Region[]{northern_europeReg, ukraineReg, western_europeReg, middle_eastReg, egyptReg, north_africaReg});
+        western_europeReg.setConnected(new Region[]{great_britainReg, northern_europeReg, southern_europeReg, north_africaReg});
+
+        north_africaReg.setConnected(new Region[]{egyptReg, brazilReg, congoReg, east_africaReg, western_europeReg, southern_europeReg});
+        egyptReg.setConnected(new Region[]{southern_europeReg, middle_eastReg, east_africaReg, north_africaReg});
+        east_africaReg.setConnected(new Region[]{north_africaReg, egyptReg, middle_eastReg, madagascarReg, south_africaReg, congoReg});
+        congoReg.setConnected(new Region[]{north_africaReg, east_africaReg, south_africaReg});
+        south_africaReg.setConnected(new Region[]{congoReg, east_africaReg, madagascarReg});
+        madagascarReg.setConnected(new Region[]{south_africaReg, east_africaReg});
+
+        middle_eastReg.setConnected(new Region[]{southern_europeReg, ukraineReg, afghanistanReg, egyptReg, east_africaReg, indiaReg});
+        afghanistanReg.setConnected(new Region[]{ukraineReg, uralReg, chinaReg, indiaReg, middle_eastReg});
+        uralReg.setConnected(new Region[]{ukraineReg, siberiaReg, chinaReg, afghanistanReg});
+        siberiaReg.setConnected(new Region[]{uralReg, yakutskReg, irkutskReg, mongoliaReg, chinaReg});
+        yakutskReg.setConnected(new Region[]{siberiaReg, kamchatkaReg, irkutskReg});
+        kamchatkaReg.setConnected(new Region[]{yakutskReg, irkutskReg, mongoliaReg, japanReg, alaskaReg});
+        japanReg.setConnected(new Region[]{kamchatkaReg, mongoliaReg});
+        irkutskReg.setConnected(new Region[]{siberiaReg, yakutskReg, kamchatkaReg, mongoliaReg});
+        mongoliaReg.setConnected(new Region[]{siberiaReg, irkutskReg, kamchatkaReg, japanReg, chinaReg});
+        chinaReg.setConnected(new Region[]{afghanistanReg, uralReg, siberiaReg, mongoliaReg, siamReg, indiaReg});
+        indiaReg.setConnected(new Region[]{middle_eastReg, afghanistanReg, chinaReg, siamReg});
+        siamReg.setConnected(new Region[]{indiaReg, chinaReg, indonesiaReg});
+
+        indonesiaReg.setConnected(new Region[]{siamReg, new_guineaReg, western_australiaReg});
+        new_guineaReg.setConnected(new Region[]{indonesiaReg, eastern_australiaReg, western_australiaReg});
+        western_australiaReg.setConnected(new Region[]{indonesiaReg, new_guineaReg, eastern_australiaReg});
+        eastern_australiaReg.setConnected(new Region[]{new_guineaReg, western_australiaReg});
 
 
         //stick regions into region array
         regionArray = new Region[]{alaskaReg, north_west_territoryReg, albertaReg, ontarioReg, quebecReg, greenlandReg,
                 western_united_statesReg, eastern_united_statesReg, central_americaReg, venezuelaReg,
-        peruReg, brazilReg, argentinaReg};
+                peruReg, brazilReg, argentinaReg, icelandReg, great_britainReg, scandinaviaReg, ukraineReg, northern_europeReg, southern_europeReg, western_europeReg,
+        north_africaReg, egyptReg, east_africaReg, congoReg, south_africaReg, madagascarReg, middle_eastReg, afghanistanReg, uralReg, siberiaReg,
+        yakutskReg, kamchatkaReg, japanReg, irkutskReg, mongoliaReg, chinaReg, indiaReg, siamReg, indonesiaReg, new_guineaReg, western_australiaReg, eastern_australiaReg};
 
     }
 
@@ -136,5 +164,82 @@ public class BoardModel {
     //used when setting up the board an placing pieces one by one
     public void increaseUnitCountByOne(Region regionToChange) {
         regionToChange.setUnitCount(regionToChange.getUnitCount() + 1);
+    }
+
+    char randomizePlayer() {
+        Random random = new Random();
+        return players[random.nextInt(4)];
+    }
+
+    public void setCurrentPlayerTurn(char currentPlayerTurn) {
+        this.currentPlayerTurn = currentPlayerTurn;
+    }
+
+    public char getCurrentPlayerTurn() {
+        return currentPlayerTurn;
+    }
+
+    void switchPlayerTurn()  {
+        if (currentPlayerTurn == 'b') {
+            currentPlayerTurn = 'o';
+            return;
+        }
+        if (currentPlayerTurn == 'o') {
+            currentPlayerTurn = 'p';
+            return;
+        }
+        if (currentPlayerTurn == 'p') {
+            currentPlayerTurn = 'g';
+            return;
+        }
+        if (currentPlayerTurn == 'g') {
+            currentPlayerTurn = 'b';
+        }
+    }
+
+
+
+
+
+    public void changePhase() {
+        if (currentPhase.equals("Reinforce")) {
+            currentPhase = "Attack";
+            return;
+        }
+        if (currentPhase.equals("Attack")) {
+            currentPhase = "Fortify";
+            return;
+        }
+        if (currentPhase.equals("Fortify")) {
+            currentPhase = "Reinforce";
+        }
+    }
+
+    public String getCurrentPhase() {
+        return currentPhase;
+    }
+
+
+    public void setCurrentGamePhase(String currentGamePhase) {
+        this.currentGamePhase = currentGamePhase;
+    }
+
+    public String getCurrentGamePhase() {
+        return currentGamePhase;
+    }
+
+    void changeGamePhase() {
+        if (currentGamePhase.equals("Setup")) {
+            currentGamePhase = "Play";
+            return;
+        }
+        if (currentGamePhase.equals("Play")) {
+            currentGamePhase = "Setup";
+        }
+    }
+
+
+    public Region[] getRegionArray() {
+        return regionArray;
     }
 }

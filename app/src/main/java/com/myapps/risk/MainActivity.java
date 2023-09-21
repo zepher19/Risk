@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +45,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     Button roll;
 
+    Button changePhaseButton;
+
+    ImageView currentPlayerGraphic;
+
+    TextView currentPhaseTextView;
+
+    Button gamePhaseButton;
+    TextView gamePhaseTextView;
+
+
+    Region attacker;
+    Region defender;
+
+    boolean attacking = false;
+
+    Button endAttack;
+
 
 
 
@@ -55,6 +73,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         boardModel = BoardModel.getInstance();
 
+
+        endAttack = findViewById(R.id.end_attack_button);
+        endAttack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideAttackUI();
+                unhighlight();
+                attacking = false;
+            }
+        });
+
+
+        gamePhaseButton = findViewById(R.id.gamePhase);
+
+        gamePhaseTextView = findViewById(R.id.game_phase_text_view);
+
+        gamePhaseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boardModel.changeGamePhase();
+                gamePhaseTextView.setText(boardModel.getCurrentGamePhase());
+            }
+        });
+
+        changePhaseButton = findViewById(R.id.change_phase_button);
+
+        currentPhaseTextView = findViewById(R.id.phase_text_view);
+        changePhaseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boardModel.changePhase();
+                currentPhaseTextView.setText(boardModel.getCurrentPhase());
+            }
+        });
+
+        currentPlayerGraphic = findViewById(R.id.current_player_graphic);
+        currentPlayerGraphic.setClickable(true);
+        currentPlayerGraphic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boardModel.switchPlayerTurn();
+                updateCurrentPlayerGraphic();
+            }
+        });
 
         line0to0 = findViewById(R.id.line_0_to_0);
         line0to0.setAlpha(0);
@@ -139,6 +201,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     defenseHighPosition = 1;
                     defenseLowPosition = 0;
                 }
+
+                //reset values
                 intDefenseResult = 0;
                 intAttackResult = 0;
 
@@ -195,6 +259,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     intDefenseResult--;
                 }
 
+                calculateLosses();
+
+
+
                 attackResult.setText(Integer.toString(intAttackResult));
                 attackResult.setGravity(Gravity.CENTER);
 
@@ -228,16 +296,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (attackHighPosition1 == 2 && defenseLowPosition == 0) {
                     line2to0.setAlpha(1);
                     line2to0.setBackgroundColor(getResources().getColor(winningColorID));
-
                 }
                 if (attackHighPosition1 == 2 && defenseLowPosition == 1) {
                     line2to1.setAlpha(1);
                     line2to1.setBackgroundColor(getResources().getColor(winningColorID));
-
                 }
-
-
-
 
 
                 defenseDie0.setText(Integer.toString(defenseDieValues[0]));
@@ -499,7 +562,61 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Australia
 
 
+        startGame();
 
+
+
+    }
+
+    private void calculateLosses() {
+        int attackCountAfterLoss = attacker.getUnitCount() + intAttackResult;
+        int defenseCountAfterLoss = defender.getUnitCount() + intDefenseResult;
+
+        //prevent negative unit counts
+        if (attackCountAfterLoss <= 0) {
+            attackCountAfterLoss = 0;
+            return;
+        }
+
+        //if defender count is zero move attacker forces in and occupy
+        if (defenseCountAfterLoss <= 0) {
+            defenseCountAfterLoss = 0;
+            occupy();
+            return;
+        }
+
+
+        attacker.setUnitCount(attackCountAfterLoss);
+        defender.setUnitCount(defenseCountAfterLoss);
+        updateUI();
+    }
+
+    private void occupy() {
+        Toast.makeText(this, "Defender has been routed!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void startGame() {
+        hideAttackUI();
+
+        boardModel.setCurrentPlayerTurn(boardModel.randomizePlayer());
+        updateCurrentPlayerGraphic();
+    }
+
+    private void updateCurrentPlayerGraphic() {
+        char currentPlayer = boardModel.getCurrentPlayerTurn();
+
+        if (currentPlayer == 'b') {
+            currentPlayerGraphic.setBackgroundColor(getResources().getColor(R.color.blue));
+        }
+        if (currentPlayer == 'o') {
+            currentPlayerGraphic.setBackgroundColor(getResources().getColor(R.color.orange));
+        }
+        if (currentPlayer == 'p') {
+            currentPlayerGraphic.setBackgroundColor(getResources().getColor(R.color.purple));
+        }
+        if (currentPlayer == 'g') {
+            currentPlayerGraphic.setBackgroundColor(getResources().getColor(R.color.green));
+        }
     }
 
     private int findSecondHigh(int[] dieValues, int attackHigh) {
@@ -522,37 +639,168 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-
-
-        /*
-
-        //print name for test
-        String regionName = v.getResources().getResourceName(v.getId());
-        regionName = regionName.substring(19);
-        regionName = regionName.replace('_', ' ');
-        regionName = regionName.toUpperCase();
-        //Toast.makeText(this, regionName, Toast.LENGTH_SHORT).show();
-
-
-        //Toast.makeText(this, boardModel.getRegionFromView(v).getConnected()[0], Toast.LENGTH_SHORT).show();
-
-
-         */
-
+        //disable clicking on other spots while attacking
+        if (attacking) {
+            return;
+        }
 
         Region localRegion = boardModel.getRegionFromView(v);
-        boardModel.increaseUnitCountByOne(localRegion);
-        updateUIUnitCount(localRegion);
+
+
+        if (boardModel.getCurrentGamePhase().equals("Setup")) {
+            if (localRegion.getUnitCount() == 0) {
+                localRegion.setColorControl(boardModel.getCurrentPlayerTurn());
+                localRegion.setTextColor(localRegion.getColorControl());
+                boardModel.increaseUnitCountByOne(localRegion);
+                updateUI();
+            }
+            else {
+                if (localRegion.getColorControl() == boardModel.getCurrentPlayerTurn()) {
+                    boardModel.increaseUnitCountByOne(localRegion);
+                    updateUI();
+                }
+            }
+        }
+        //else game phase is play
+        else {
+            if (boardModel.getCurrentPhase().equals("Attack")) {
+                //if highlighted attack the spot
+
+                //if the spot is highlighted and the attacker has enough units to attack, attack
+                if (localRegion.getTextColor() == 'w' && localRegion.getUnitCount() >= 3) {
+                    defender = localRegion;
+                    attack(localRegion);
+                    return;
+                }
+
+                //unhighlight if any textview is clicked to clear old highlights
+                unhighlight();
+
+                //highlight if player turn is same as controlling player
+                if (localRegion.getColorControl() == boardModel.getCurrentPlayerTurn()) {
+                    highlight(localRegion);
+                    attacker = localRegion;
+                }
+            }
+        }
     }
 
-    private void updateUIUnitCount(Region localRegion) {
-        TextView localView = findViewById(localRegion.getViewID());
-        localView.setText(Integer.toString(localRegion.getUnitCount()));
-        localView.setGravity(Gravity.CENTER);
+    private void attack(Region localRegion) {
+
+        showAttackUI();
+
+        //unhighlight all of the other possible defenders
+        unhighlight();
+        //reset the one defender to be highlighted
+        attacker.setTextColor('r');
+        defender.setTextColor('w');
+        updateUI();
+        attacking = true;
     }
 
+    private void showAttackUI() {
+        attackDie0.setAlpha(1);
+        attackDie1.setAlpha(1);
+        attackDie2.setAlpha(1);
 
-    void updateUI(Region regionToChange) {
+        defenseDie0.setAlpha(1);
+        defenseDie1.setAlpha(1);
+        attackResult.setAlpha(1);
+        defenseResult.setAlpha(1);
+        roll.setAlpha(1);
+        roll.setClickable(true);
+        endAttack.setAlpha(1);
+        endAttack.setClickable(true);
+    }
 
+    private void hideAttackUI() {
+        attackDie0.setAlpha(0);
+        attackDie1.setAlpha(0);
+        attackDie2.setAlpha(0);
+
+        defenseDie0.setAlpha(0);
+        defenseDie1.setAlpha(0);
+        attackResult.setAlpha(0);
+        defenseResult.setAlpha(0);
+        roll.setAlpha(0);
+        roll.setClickable(false);
+        endAttack.setAlpha(0);
+        endAttack.setClickable(false);
+
+        //hide lines
+        line0to0.setAlpha(0);
+        line0to1.setAlpha(0);
+        line1to0.setAlpha(0);
+        line1to1.setAlpha(0);
+        line2to0.setAlpha(0);
+        line2to1.setAlpha(0);
+
+    }
+
+    private void updateUI() {
+        updateUnitCount();
+    }
+
+    private void unhighlight() {
+        for (int i = 0; i < boardModel.getRegionArray().length; i++) {
+            if (boardModel.getRegionArray()[i].getTextColor() == 'w' || boardModel.getRegionArray()[i].getTextColor() == 'r') {
+                boardModel.getRegionArray()[i].setTextColor('0');
+            }
+        }
+        updateUI();
+    }
+
+    private void highlight(Region localRegion) {
+        highlightAttacker(localRegion);
+        highlightDefenders(localRegion);
+        updateUI();
+    }
+
+    private void highlightDefenders(Region localRegion) {
+        for (int i = 0; i < localRegion.getConnected().length; i++) {
+            if (localRegion.getConnected()[i].getColorControl() != boardModel.getCurrentPlayerTurn()) {
+                localRegion.getConnected()[i].setTextColor('w');
+            }
+        }
+    }
+
+    private void highlightAttacker(Region localRegion) {
+        localRegion.setTextColor('r');
+    }
+
+    private void updateUnitCount() {
+        for (int i = 0; i < boardModel.getRegionArray().length; i++) {
+
+            TextView localTextView = findViewById(boardModel.getRegionArray()[i].getViewID());
+            Region localRegion = boardModel.getRegionArray()[i];
+
+            //set unit color
+
+            //if unhighlighted, text color should equal the controlling color
+            if (localRegion.getTextColor() == '0') {
+                localRegion.setTextColor(localRegion.getColorControl());
+            }
+            if (localRegion.getTextColor() == 'b') {
+                localTextView.setTextColor(getResources().getColor(R.color.blue));
+            }
+            if (localRegion.getTextColor() == 'o') {
+                localTextView.setTextColor(getResources().getColor(R.color.orange));
+            }
+            if (localRegion.getTextColor() == 'p') {
+                localTextView.setTextColor(getResources().getColor(R.color.purple));
+            }
+            if (localRegion.getTextColor() == 'g') {
+                localTextView.setTextColor(getResources().getColor(R.color.green));
+            }
+            if (localRegion.getTextColor() == 'r') {
+                localTextView.setTextColor(getResources().getColor(R.color.red));
+            }
+            if (localRegion.getTextColor() == 'w') {
+                localTextView.setTextColor(getResources().getColor(R.color.white));
+            }
+            //set unit count
+            localTextView.setText(Integer.toString(localRegion.getUnitCount()));
+            localTextView.setGravity(Gravity.CENTER);
+        }
     }
 }

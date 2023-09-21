@@ -2,19 +2,28 @@ package com.myapps.risk;
 
 public class Region {
 
-    private String[] connected;
-
+    private Region[] connected;
     private int viewID;
-
     private char colorControl;
+    private char textColor;
+
 
     private int unitCount = 0;
 
-    public Region(String[] connected, int viewID) {
-        this.connected = connected;
+    public Region(int viewID) {
         this.viewID = viewID;
     }
 
+
+
+
+    public void setTextColor(char textColor) {
+        this.textColor = textColor;
+    }
+
+    public char getTextColor() {
+        return textColor;
+    }
 
     public int getViewID() {
         return viewID;
@@ -36,7 +45,11 @@ public class Region {
         return unitCount;
     }
 
-    public String[] getConnected() {
+    public Region[] getConnected() {
         return connected;
+    }
+
+    public void setConnected(Region[] connected) {
+        this.connected = connected;
     }
 }
