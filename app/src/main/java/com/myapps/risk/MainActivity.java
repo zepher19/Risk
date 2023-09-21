@@ -36,6 +36,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     TextView line0to0, line0to1, line1to0, line1to1, line2to0, line2to1;
 
+    TextView attackResult, defenseResult;
+
+    String stringAttackResults, stringdefenseResults;
+    int intAttackResult, intDefenseResult;
+
 
     Button roll;
 
@@ -63,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         line2to0.setAlpha(0);
         line2to1 = findViewById(R.id.line_2_to_1);
         line2to1.setAlpha(0);
+
+        attackResult = findViewById(R.id.attack_result_text_view);
+        defenseResult = findViewById(R.id.defense_result_text_view);
 
 
         roll = findViewById(R.id.roll_button);
@@ -131,14 +139,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     defenseHighPosition = 1;
                     defenseLowPosition = 0;
                 }
+                intDefenseResult = 0;
+                intAttackResult = 0;
 
                 int winningColorID;
 
                 if (defenseHigh >= attackHigh) {
                     winningColorID = R.color.white;
+                    intAttackResult--;
                 }
                 else {
                     winningColorID = R.color.red;
+                    intDefenseResult--;
                 }
 
 
@@ -175,11 +187,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 if (defenseLow >= attackHigh1) {
                     winningColorID = R.color.white;
+                    intAttackResult--;
+
                 }
                 else {
                     winningColorID = R.color.red;
+                    intDefenseResult--;
                 }
 
+                attackResult.setText(Integer.toString(intAttackResult));
+                attackResult.setGravity(Gravity.CENTER);
+
+                defenseResult.setText(Integer.toString(intDefenseResult));
+                defenseResult.setGravity(Gravity.CENTER);
 
 
                 //set lines based on dice rolls
@@ -478,6 +498,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         eastern_australia.setOnClickListener(this);
         //Australia
 
+
+
     }
 
     private int findSecondHigh(int[] dieValues, int attackHigh) {
@@ -500,10 +522,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+
+        //print name for test
         String regionName = v.getResources().getResourceName(v.getId());
         regionName = regionName.substring(19);
         regionName = regionName.replace('_', ' ');
         regionName = regionName.toUpperCase();
-        Toast.makeText(this, regionName, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, regionName, Toast.LENGTH_SHORT).show();
+
+
+        Toast.makeText(this, boardModel.getRegionFromViewID(v).getConnected()[0], Toast.LENGTH_SHORT).show();
+
+
+
+
     }
 }
