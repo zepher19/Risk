@@ -11,8 +11,22 @@ public class BoardModel {
 
     private Region[] regionArray;
 
+    private char currentPlayerTurn;
 
-    private String alaska, northwest_territory, alberta, ontario, quebec,
+    private char[] players;
+
+
+    private Region alaskaReg, north_west_territoryReg, albertaReg, ontarioReg, quebecReg,
+            western_united_statesReg, eastern_united_statesReg, central_americaReg,
+            greenlandReg, venezuelaReg, peruReg, brazilReg, argentinaReg, icelandReg, scandinaviaReg,
+            great_britainReg, western_europeReg, northern_europeReg, southern_europeReg,
+            ukraineReg, north_africaReg, egyptReg, east_africaReg, congoReg, south_africaReg,
+            madagascarReg, middle_eastReg, afghanistanReg, uralReg, siberiaReg, yakutskReg,
+            kamchatkaReg, japanReg, irkutskReg, mongoliaReg, chinaReg, indiaReg, siamReg, indonesiaReg, new_guineaReg,
+            western_australiaReg, eastern_australiaReg;
+
+
+    private String alaska, north_west_territory, alberta, ontario, quebec,
             western_united_states, eastern_united_states, central_america,
             greenland, venezuela, peru, brazil, argentina, iceland, scandinavia,
             great_britain, western_europe, northern_europe, southern_europe,
@@ -27,7 +41,7 @@ public class BoardModel {
     // private constructor to avoid client applications using the constructor
     private BoardModel(){
         alaska = "ALASKA";
-        northwest_territory = "NORTH WEST TERRITORY";
+        north_west_territory = "NORTH WEST TERRITORY";
         alberta = "ALBERTA";
         ontario = "ONTARIO";
         quebec = "QUEBEC";
@@ -69,18 +83,30 @@ public class BoardModel {
         western_australia = "WESTERN AUSTRALIA";
         eastern_australia = "EASTERN AUSTRALIA";
 
-        Region alaskaReg = new Region(new String[]{northwest_territory, alberta, kamchatka}, R.id.alaska);
-        Region north_west_territoryReg = new Region(new String[]{alaska, alberta, ontario, greenland}, R.id.north_west_territory);
-        Region albertaReg = new Region(new String[]{alaska, northwest_territory, ontario, western_united_states}, R.id.alberta);
-        Region ontarioReg = new Region(new String[]{northwest_territory, alberta, western_united_states, eastern_united_states, quebec, greenland}, R.id.ontario);
-        Region quebecReg = new Region(new String[]{ontario, eastern_united_states, greenland}, R.id.quebec);
-        Region greenlandReg = new Region(new String[]{iceland, quebec, ontario, northwest_territory}, R.id.greenland);
-        Region western_united_statesReg = new Region(new String[]{alberta, ontario, eastern_united_states, central_america}, R.id.western_united_states);
-        Region eastern_united_statesReg = new Region(new String[]{western_united_states, central_america, quebec, ontario}, R.id.eastern_united_states);
-        Region central_americaReg = new Region(new String[]{western_united_states, eastern_united_states, venezuela}, R.id.central_america);
+        //initialize all regions with connections and View ID
+        alaskaReg = new Region(new String[]{north_west_territory, alberta, kamchatka}, R.id.alaska);
+        north_west_territoryReg = new Region(new String[]{alaska, alberta, ontario, greenland}, R.id.north_west_territory);
+        albertaReg = new Region(new String[]{alaska, north_west_territory, ontario, western_united_states}, R.id.alberta);
+        ontarioReg = new Region(new String[]{north_west_territory, alberta, western_united_states, eastern_united_states, quebec, greenland}, R.id.ontario);
+        quebecReg = new Region(new String[]{ontario, eastern_united_states, greenland}, R.id.quebec);
+        greenlandReg = new Region(new String[]{iceland, quebec, ontario, north_west_territory}, R.id.greenland);
+        western_united_statesReg = new Region(new String[]{alberta, ontario, eastern_united_states, central_america}, R.id.western_united_states);
+        eastern_united_statesReg = new Region(new String[]{western_united_states, central_america, quebec, ontario}, R.id.eastern_united_states);
+        central_americaReg = new Region(new String[]{western_united_states, eastern_united_states, venezuela}, R.id.central_america);
 
+
+        venezuelaReg = new Region(new String[]{central_america, peru, brazil}, R.id.venezuela);
+        peruReg = new Region(new String[]{venezuela, argentina, brazil}, R.id.peru);
+        brazilReg = new Region(new String[]{venezuela, peru, argentina, north_africa}, R.id.brazil);
+        argentinaReg = new Region(new String[]{peru, brazil}, R.id.argentina);
+
+
+
+
+        //stick regions into region array
         regionArray = new Region[]{alaskaReg, north_west_territoryReg, albertaReg, ontarioReg, quebecReg, greenlandReg,
-                western_united_statesReg, eastern_united_statesReg, central_americaReg};
+                western_united_statesReg, eastern_united_statesReg, central_americaReg, venezuelaReg,
+        peruReg, brazilReg, argentinaReg};
 
     }
 
@@ -97,7 +123,7 @@ public class BoardModel {
     }
 
 
-    public Region getRegionFromViewID(View v) {
+    public Region getRegionFromView(View v) {
         for (int i = 0; i < regionArray.length; i++) {
             if (regionArray[i].getViewID() == v.getId()) {
                 return regionArray[i];
@@ -107,6 +133,8 @@ public class BoardModel {
     }
 
 
-    public void increaseUnitCount(View v) {
+    //used when setting up the board an placing pieces one by one
+    public void increaseUnitCountByOne(Region regionToChange) {
+        regionToChange.setUnitCount(regionToChange.getUnitCount() + 1);
     }
 }

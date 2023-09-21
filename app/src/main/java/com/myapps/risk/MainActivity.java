@@ -523,6 +523,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
 
+
+        /*
+
         //print name for test
         String regionName = v.getResources().getResourceName(v.getId());
         regionName = regionName.substring(19);
@@ -531,10 +534,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Toast.makeText(this, regionName, Toast.LENGTH_SHORT).show();
 
 
-        Toast.makeText(this, boardModel.getRegionFromViewID(v).getConnected()[0], Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, boardModel.getRegionFromView(v).getConnected()[0], Toast.LENGTH_SHORT).show();
 
 
+         */
 
+
+        Region localRegion = boardModel.getRegionFromView(v);
+        boardModel.increaseUnitCountByOne(localRegion);
+        updateUIUnitCount(localRegion);
+    }
+
+    private void updateUIUnitCount(Region localRegion) {
+        TextView localView = findViewById(localRegion.getViewID());
+        localView.setText(Integer.toString(localRegion.getUnitCount()));
+        localView.setGravity(Gravity.CENTER);
+    }
+
+
+    void updateUI(Region regionToChange) {
 
     }
 }

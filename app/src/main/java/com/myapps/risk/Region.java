@@ -7,6 +7,7 @@ public class Region {
     private int viewID;
 
     private char colorControl;
+
     private int unitCount = 0;
 
     public Region(String[] connected, int viewID) {
