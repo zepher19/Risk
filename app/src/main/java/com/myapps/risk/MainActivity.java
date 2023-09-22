@@ -11,12 +11,17 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -61,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView gamePhaseTextView;
 
 
+    Region fortifier;
     Region attacker;
     Region defender;
 
@@ -68,9 +74,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     Button endAttack;
 
-    int occupyNumber;
+    int occupyNumber, fortifyNumber, reinforcements, reinforcementsLeftToPlace;
 
-    String occupyNumberString;
+    boolean firstReinforceOfTurn = true;
+
+    String occupyNumberString, fortifyNumberString;
 
 
 
@@ -582,14 +590,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int defenseCountAfterLoss = defender.getUnitCount() + intDefenseResult;
 
         //prevent negative unit counts
-        if (attackCountAfterLoss <= 0) {
-            attackCountAfterLoss = 0;
+        if (attackCountAfterLoss <= 1) {
+            attackCountAfterLoss = 1;
             return;
         }
 
         //if defender count is zero move attacker forces in and occupy
         if (defenseCountAfterLoss <= 0) {
             defenseCountAfterLoss = 0;
+            attacker.setUnitCount(attackCountAfterLoss);
+            defender.setUnitCount(defenseCountAfterLoss);
             occupy();
             return;
         }
@@ -601,17 +611,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void occupy() {
-        messageAboutOccupy();
-
-    }
-
-    private void messageAboutOccupy() {
         // Create the object of AlertDialog Builder class
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         // Set the message show for the Alert time
-        builder.setMessage("Select a number of units to occupy the territory. You have " +
-                Integer.toString(attacker.getUnitCount()) + " total units. Remember you must leave one behind.");
+        builder.setMessage("Select the number of units you wish to occupy the territory. You have " +
+                Integer.toString(attacker.getUnitCount()) + " total units. You may move between 1 and " + Integer.toString(attacker.getUnitCount() - 1) + ".");
 
         // Set Alert Title
         builder.setTitle("Defender is out of units!");
@@ -619,8 +624,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
         builder.setCancelable(false);
 
-
-
+        //create edit text for player to enter number of troops to move
         EditText editText = new EditText(this);
 
         //to only allow numbers to be entered
@@ -628,18 +632,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 occupyNumberString = s.toString();
-
             }
-
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
 
@@ -663,7 +662,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             else {
                 Toast.makeText(this, "Value must be in range", Toast.LENGTH_SHORT).show();
-                messageAboutOccupy();
+                occupy();
             }
         });
 
@@ -721,33 +720,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (attacking) {
             return;
         }
-
+        //create local region from the view
         Region localRegion = boardModel.getRegionFromView(v);
 
-
         if (boardModel.getCurrentGamePhase().equals("Setup")) {
-            if (localRegion.getUnitCount() == 0) {
-                localRegion.setColorControl(boardModel.getCurrentPlayerTurn());
-                localRegion.setTextColor(localRegion.getColorControl());
-                boardModel.increaseUnitCountByOne(localRegion);
-                updateUI();
-            }
-            else {
+            setup(localRegion);
+        }
+        //else game phase is play phase
+        else {
+
+
+            if (boardModel.getCurrentPhase().equals("Reinforce")) {
                 if (localRegion.getColorControl() == boardModel.getCurrentPlayerTurn()) {
-                    boardModel.increaseUnitCountByOne(localRegion);
-                    updateUI();
+                    reinforce(localRegion);
                 }
             }
-        }
-        //else game phase is play
-        else {
-            if (boardModel.getCurrentPhase().equals("Attack")) {
-                //if highlighted attack the spot
 
+
+            if (boardModel.getCurrentPhase().equals("Attack")) {
                 //if the spot is highlighted and the attacker has enough units to attack, attack
-                if (localRegion.getTextColor() == 'w' && localRegion.getUnitCount() >= 3) {
-                    defender = localRegion;
+                if (localRegion.getTextColor() == 'w') {
                     attack(localRegion);
+                    //return is necessary
                     return;
                 }
 
@@ -760,20 +754,175 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     attacker = localRegion;
                 }
             }
+
+
+            //if fortifying
+            if (boardModel.getCurrentPhase().equals("Fortify")) {
+                //if the spot is highlighted for fortifying, fortify
+                if (localRegion.getTextColor() == 's') {
+                    fortify(localRegion);
+                    //return is necessary
+                    return;
+                }
+
+                //highlight if player turn is same as controlling player
+                if (localRegion.getColorControl() == boardModel.getCurrentPlayerTurn()) {
+                    fortifyHighlight(localRegion);
+                    fortifier = localRegion;
+                }
+                else {
+                    fortifyUnhighlight();
+                }
+            }
+        }
+    }
+
+    //TODO firstReinforceOfTurn needs to be set to true when turn ends so next player can reinforce
+    private void reinforce(Region localRegion) {
+        //only calculate reinforcements the first time
+        if (firstReinforceOfTurn) {
+            reinforcements = boardModel.countControlledRegions() / 3;
+
+
+            //determine continent bonus if applicable
+            boardModel.getContinentBonus();
+
+            if (boardModel.northAmericaBonus) {
+                reinforcements = reinforcements + boardModel.NORTH_AMERICA_BONUS_VALUE;
+            }
+            if (boardModel.southAmericaBonus) {
+                reinforcements = reinforcements + boardModel.SOUTH_AMERICA_BONUS_VALUE;
+            }
+            if (boardModel.europeBonus) {
+                reinforcements = reinforcements + boardModel.EUROPE_BONUS_VALUE;
+            }
+            if (boardModel.africaBonus) {
+                reinforcements = reinforcements + boardModel.AFRICA_BONUS_VALUE;
+            }
+            if (boardModel.asiaBonus) {
+                reinforcements = reinforcements + boardModel.ASIA_BONUS_VALUE;
+            }
+            if (boardModel.australiaBonus) {
+                reinforcements = reinforcements + boardModel.AUSTRALIA_BONUS_VALUE;
+            }
+
+            firstReinforceOfTurn = false;
+            Toast.makeText(this, Integer.toString(reinforcements), Toast.LENGTH_SHORT).show();
+        }
+
+        if (reinforcements > 0) {
+            localRegion.setUnitCount(localRegion.getUnitCount() + 1);
+            updateUI();
+            reinforcements--;
+        }
+    }
+
+
+
+    private void fortifyUnhighlight() {
+        for (int i = 0; i < boardModel.getRegionArray().length; i++) {
+            if (boardModel.getRegionArray()[i].getTextColor() == 's') {
+                boardModel.getRegionArray()[i].setTextColor('0');
+            }
+        }
+        updateUI();
+    }
+
+    private void fortify(Region localRegion) {
+        // Create the object of AlertDialog Builder class
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        // Set the message show for the Alert time
+        builder.setMessage("Select the number of units you wish to move. You have " +
+                Integer.toString(fortifier.getUnitCount()) + " total units. You may move between 1 and " + Integer.toString(fortifier.getUnitCount() - 1) + ".");
+
+        // Set Alert Title
+        builder.setTitle("Fortify");
+
+        // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
+        builder.setCancelable(false);
+
+        //create edit text for player to enter number of troops to move
+        EditText editText = new EditText(this);
+
+        //to only allow numbers to be entered
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                fortifyNumberString = s.toString();
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        builder.setView(editText);
+
+        builder.setNegativeButton("Done", (DialogInterface.OnClickListener) (dialog, which) -> {
+            // If user click no then dialog box is canceled.
+            fortifyNumber = Integer.parseInt(fortifyNumberString);
+            if (fortifyNumber > 0 && fortifyNumber < fortifier.getUnitCount()) {
+                dialog.cancel();
+                localRegion.setUnitCount(fortifyNumber + 1);
+                fortifier.setUnitCount(fortifier.getUnitCount() - fortifyNumber);
+                fortifyUnhighlight();
+            }
+            else {
+                Toast.makeText(this, "Value must be in range", Toast.LENGTH_SHORT).show();
+                fortify(localRegion);
+            }
+        });
+
+        // Create the Alert dialog
+        AlertDialog alertDialog = builder.create();
+        // Show the Alert Dialog box
+        alertDialog.show();
+    }
+
+    private void fortifyHighlight(Region localRegion) {
+        for (int i = 0; i < localRegion.getConnected().length; i++) {
+            if (localRegion.getConnected()[i].getColorControl() == boardModel.getCurrentPlayerTurn()) {
+                localRegion.getConnected()[i].setTextColor('s');
+            }
+        }
+        updateUI();
+    }
+
+    private void setup(Region localRegion) {
+        if (localRegion.getUnitCount() == 0) {
+            localRegion.setColorControl(boardModel.getCurrentPlayerTurn());
+            localRegion.setTextColor(localRegion.getColorControl());
+            boardModel.increaseUnitCountByOne(localRegion);
+            updateUI();
+        }
+        else {
+            if (localRegion.getColorControl() == boardModel.getCurrentPlayerTurn()) {
+                boardModel.increaseUnitCountByOne(localRegion);
+                updateUI();
+            }
         }
     }
 
     private void attack(Region localRegion) {
-
-        showAttackUI();
-
-        //unhighlight all of the other possible defenders
-        unhighlight();
-        //reset the one defender to be highlighted
-        attacker.setTextColor('r');
-        defender.setTextColor('w');
-        updateUI();
-        attacking = true;
+        //check to see if player has enough units to attack
+        if (attacker.getUnitCount() > 2) {
+            defender = localRegion;
+            attacking = true;
+            showAttackUI();
+            //unhighlight all of the other possible defenders
+            unhighlight();
+            //reset the one defender to be highlighted
+            attacker.setTextColor('r');
+            defender.setTextColor('w');
+            updateUI();
+        }
+        else {
+            Toast.makeText(this, "You must have at least 3 units in a territory to attack.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showAttackUI() {
@@ -792,14 +941,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void hideAttackUI() {
+        attacking = false;
+
         attackDie0.setAlpha(0);
+        attackDie0.setText("");
         attackDie1.setAlpha(0);
+        attackDie1.setText("");
         attackDie2.setAlpha(0);
+        attackDie2.setText("");
+
 
         defenseDie0.setAlpha(0);
+        defenseDie0.setText("");
         defenseDie1.setAlpha(0);
+        defenseDie1.setText("");
+
+        intAttackResult = 0;
+        intDefenseResult = 0;
+
         attackResult.setAlpha(0);
+        attackResult.setText("");
         defenseResult.setAlpha(0);
+        defenseResult.setText("");
+
         roll.setAlpha(0);
         roll.setClickable(false);
         endAttack.setAlpha(0);
@@ -875,6 +1039,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             if (localRegion.getTextColor() == 'w') {
                 localTextView.setTextColor(getResources().getColor(R.color.white));
+            }
+            if (localRegion.getTextColor() == 's') {
+                localTextView.setTextColor(getResources().getColor(R.color.silver));
             }
             //set unit count
             localTextView.setText(Integer.toString(localRegion.getUnitCount()));

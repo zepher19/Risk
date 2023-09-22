@@ -1,9 +1,6 @@
 package com.myapps.risk;
 
-import android.content.Context;
-import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.Random;
 
@@ -17,12 +14,46 @@ public class BoardModel {
     private String currentGamePhase = "Setup";
 
 
+
     private final Region[] regionArray;
+
+    private final Region[] northAmerica;
+
+    private final Region[] southAmerica;
+    private final Region[] europe;
+    private final Region[] africa;
+
+    private final Region[] asia;
+    private final Region[] australia;
+
+
+
+    boolean northAmericaBonus = false;
+    boolean southAmericaBonus = false;
+    boolean europeBonus = false;
+    boolean africaBonus = false;
+    boolean asiaBonus = false;
+    boolean australiaBonus = false;
+
+
+
+    final int NORTH_AMERICA_BONUS_VALUE = 5;
+    final int SOUTH_AMERICA_BONUS_VALUE = 2;
+    final int EUROPE_BONUS_VALUE = 5;
+    final int AFRICA_BONUS_VALUE = 3;
+    final int ASIA_BONUS_VALUE = 7;
+    final int AUSTRALIA_BONUS_VALUE = 2;
+
+
+
+
+
+
+
 
     private char currentPlayerTurn;
 
     private final char[] players = {'b', 'o', 'p', 'g'};
-
 
     private static final BoardModel instance = new BoardModel();
 
@@ -136,6 +167,13 @@ public class BoardModel {
         north_africaReg, egyptReg, east_africaReg, congoReg, south_africaReg, madagascarReg, middle_eastReg, afghanistanReg, uralReg, siberiaReg,
         yakutskReg, kamchatkaReg, japanReg, irkutskReg, mongoliaReg, chinaReg, indiaReg, siamReg, indonesiaReg, new_guineaReg, western_australiaReg, eastern_australiaReg};
 
+        //initialize continent blocks
+        northAmerica = new Region[]{alaskaReg, north_west_territoryReg, albertaReg, ontarioReg, western_united_statesReg, eastern_united_statesReg, quebecReg, central_americaReg, greenlandReg};
+        southAmerica = new Region[]{venezuelaReg, peruReg, argentinaReg, brazilReg};
+        europe = new Region[]{icelandReg, great_britainReg, western_europeReg, scandinaviaReg, ukraineReg, northern_europeReg, southern_europeReg};
+        africa = new Region[]{north_africaReg, egyptReg, east_africaReg, congoReg, south_africaReg, madagascarReg};
+        asia = new Region[]{uralReg, afghanistanReg, middle_eastReg, siberiaReg, chinaReg, indiaReg, yakutskReg, irkutskReg, mongoliaReg, siamReg, kamchatkaReg, japanReg};
+        australia = new Region[]{indonesiaReg, new_guineaReg, western_australiaReg, eastern_australiaReg};
     }
 
     public static BoardModel getInstance() {
@@ -241,5 +279,95 @@ public class BoardModel {
 
     public Region[] getRegionArray() {
         return regionArray;
+    }
+
+    public int countControlledRegions() {
+        int controlledRegions = 0;
+        for (int i = 0; i < regionArray.length; i++) {
+            if (regionArray[i].getColorControl() == currentPlayerTurn) {
+                controlledRegions++;
+            }
+        }
+        return controlledRegions;
+    }
+
+    public void getContinentBonus() {
+        northAmericaBonus = false;
+        southAmericaBonus = false;
+        europeBonus = false;
+        africaBonus = false;
+        asiaBonus = false;
+        australiaBonus = false;
+
+
+        int counter = 0;
+
+        for (int i = 0; i < northAmerica.length; i++) {
+
+            if (northAmerica[i].getColorControl() == currentPlayerTurn) {
+                counter++;
+            }
+            if (counter == northAmerica.length) {
+                northAmericaBonus = true;
+            }
+        }
+
+        counter = 0;
+
+        for (int i = 0; i < southAmerica.length; i++) {
+            if (southAmerica[i].getColorControl() == currentPlayerTurn) {
+                counter++;
+            }
+            if (counter == southAmerica.length) {
+                southAmericaBonus = true;
+            }
+        }
+
+        counter = 0;
+
+        for (int i = 0; i < europe.length; i++) {
+            if (europe[i].getColorControl() == currentPlayerTurn) {
+                counter++;
+            }
+            if (counter == europe.length) {
+                europeBonus = true;
+            }
+        }
+
+        counter = 0;
+
+        for (int i = 0; i < africa.length; i++) {
+            if (africa[i].getColorControl() == currentPlayerTurn) {
+                counter++;
+            }
+            if (counter == africa.length) {
+                africaBonus = true;
+            }
+
+        }
+
+        counter = 0;
+
+        for (int i = 0; i < asia.length; i++) {
+            if (asia[i].getColorControl() == currentPlayerTurn) {
+                counter++;
+            }
+            if (counter == asia.length) {
+                asiaBonus = true;
+            }
+
+        }
+
+        counter = 0;
+
+        for (int i = 0; i < australia.length; i++) {
+            if (australia[i].getColorControl() == currentPlayerTurn) {
+                counter++;
+            }
+            if (counter == australia.length) {
+                australiaBonus = true;
+            }
+        }
+
     }
 }
