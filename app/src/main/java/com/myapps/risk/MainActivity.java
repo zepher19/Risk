@@ -1,18 +1,24 @@
 package com.myapps.risk;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -62,6 +68,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     Button endAttack;
 
+    int occupyNumber;
+
+    String occupyNumberString;
 
 
 
@@ -592,7 +601,76 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void occupy() {
-        Toast.makeText(this, "Defender has been routed!", Toast.LENGTH_SHORT).show();
+        messageAboutOccupy();
+
+    }
+
+    private void messageAboutOccupy() {
+        // Create the object of AlertDialog Builder class
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        // Set the message show for the Alert time
+        builder.setMessage("Select a number of units to occupy the territory. You have " +
+                Integer.toString(attacker.getUnitCount()) + " total units. Remember you must leave one behind.");
+
+        // Set Alert Title
+        builder.setTitle("Defender is out of units!");
+
+        // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
+        builder.setCancelable(false);
+
+
+
+        EditText editText = new EditText(this);
+
+        //to only allow numbers to be entered
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                occupyNumberString = s.toString();
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        builder.setView(editText);
+
+
+
+        builder.setNegativeButton("Done", (DialogInterface.OnClickListener) (dialog, which) -> {
+            // If user click no then dialog box is canceled.
+            occupyNumber = Integer.parseInt(occupyNumberString);
+            if (occupyNumber > 0 && occupyNumber < attacker.getUnitCount()) {
+                dialog.cancel();
+                occupyNumber = Integer.parseInt(occupyNumberString);
+                defender.setColorControl(attacker.getColorControl());
+                defender.setUnitCount(occupyNumber);
+                attacker.setUnitCount(attacker.getUnitCount() - occupyNumber);
+                unhighlight();
+                hideAttackUI();
+                updateUI();
+                attacking = false;
+            }
+            else {
+                Toast.makeText(this, "Value must be in range", Toast.LENGTH_SHORT).show();
+                messageAboutOccupy();
+            }
+        });
+
+        // Create the Alert dialog
+        AlertDialog alertDialog = builder.create();
+        // Show the Alert Dialog box
+        alertDialog.show();
     }
 
     private void startGame() {
