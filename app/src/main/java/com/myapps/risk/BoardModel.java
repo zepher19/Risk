@@ -9,9 +9,7 @@ public class BoardModel {
     //start on fortify so when it switches in first turn it lands on reinforce
     private String currentPhase = "Reinforce";
 
-    private final String[] gamePhases = {"Setup", "Play"};
     private String currentGamePhase = "Setup";
-
 
 
     private final Region[] regionArray;

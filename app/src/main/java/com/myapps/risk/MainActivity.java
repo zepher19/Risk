@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int unitPlacementCounter = 120;
 
 
-
+    TextView textView0, textView1;
 
 
     Region fortifier;
@@ -78,8 +78,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     boolean placedSetupPiece = false;
 
 
-    TextView gamePhaseTextView, turnPhaseTextView, unitPlacementCounterTextView;
+    TextView gamePhaseTextView, unitPlacementCounterTextView;
 
+    TextSwitcher turnPhaseTextView;
+
+    boolean setupFirstPlacement = true;
 
 
     @Override
@@ -94,6 +97,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         gamePhaseTextView = findViewById(R.id.game_phase_text_view);
         turnPhaseTextView = findViewById(R.id.turn_phase_text_view);
+        turnPhaseTextView.setAlpha(0);
+        textView0 = findViewById(R.id.text_view_0);
+        textView1 = findViewById(R.id.text_view_1);
 
 
         endAttack = findViewById(R.id.end_attack_button);
@@ -122,38 +128,48 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onClick(View v) {
                 //if in setup
                 if (boardModel.getCurrentGamePhase().equals("Setup")) {
-                    //if there are blank spots
-                    if (scanForBlankSpots()) {
-                        boardModel.switchPlayerTurn();
-                        updateCurrentPlayerGraphic();
-                    }
-                    //if there are no blank spots
-                    else {
-                        boardModel.setCurrentGamePhase("Place");
-                        gamePhaseTextView.setText(boardModel.getCurrentGamePhase());
-                        gamePhaseTextView.setGravity(Gravity.CENTER);
-                        boardModel.switchPlayerTurn();
-                        updateCurrentPlayerGraphic();
+                    //setup first placement needs to be false to ensure the previous player set a unit down
+                    if (!setupFirstPlacement) {
+                        //if there are blank spots
+                        if (scanForBlankSpots()) {
+                            boardModel.switchPlayerTurn();
+                            updateCurrentPlayerGraphic();
+                            setupFirstPlacement = true;
+                        }
+                        //if there are no blank spots
+                        else {
+                            boardModel.setCurrentGamePhase("Place");
+                            gamePhaseTextView.setText(boardModel.getCurrentGamePhase());
+                            gamePhaseTextView.setGravity(Gravity.CENTER);
+                            boardModel.switchPlayerTurn();
+                            updateCurrentPlayerGraphic();
+                            setupFirstPlacement = true;
+                        }
                     }
                 }
 
                 //if in placing additional units phase
                 else if (boardModel.getCurrentGamePhase().equals("Place")) {
-                    if (scanForNumUnits()) {
-                        boardModel.switchPlayerTurn();
-                        updateCurrentPlayerGraphic();
-                    }
-                    else {
-                        boardModel.setCurrentGamePhase("Play");
-                        gamePhaseTextView.setAlpha(0);
-                        unitPlacementCounterTextView.setAlpha(0);
-                        boardModel.switchPlayerTurn();
-                        updateCurrentPlayerGraphic();
+                    //setup first placement needs to be false to ensure the previous player set a unit down
+                    if (!setupFirstPlacement) {
+                        if (scanForNumUnits()) {
+                            boardModel.switchPlayerTurn();
+                            updateCurrentPlayerGraphic();
+                            setupFirstPlacement = true;
+
+                        } else {
+                            boardModel.setCurrentGamePhase("Play");
+                            turnPhaseTextView.setAlpha(1);
+                            gamePhaseTextView.setAlpha(0);
+                            unitPlacementCounterTextView.setAlpha(0);
+                            boardModel.switchPlayerTurn();
+                            updateCurrentPlayerGraphic();
+                        }
                     }
                 }
 
 
-                    //if in play
+                //if in play
                 else {
                     //if fortify pressing the button sends you into the next turn
                     if (boardModel.getCurrentPhase().equals("Fortify")) {
@@ -163,14 +179,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     else {
                         boardModel.switchCurrentPhase();
                         turnPhaseTextView.setText(boardModel.getCurrentPhase());
-                        turnPhaseTextView.setGravity(Gravity.CENTER);
+                        textView0.setGravity(Gravity.CENTER);
+                        textView1.setGravity(Gravity.CENTER);
+
                     }
 
                 }
-
-
             }
         });
+
+
+
+
+
 
         line0to0 = findViewById(R.id.line_0_to_0);
         line0to0.setAlpha(0);
@@ -328,19 +349,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (attackHighPosition1 == 0 && defenseLowPosition == 0) {
                     line0to0.setAlpha(1);
                     line0to0.setBackgroundColor(getResources().getColor(winningColorID));
-
-
                 }
                 if (attackHighPosition1 == 0 && defenseLowPosition == 1) {
                     line0to1.setAlpha(1);
                     line0to1.setBackgroundColor(getResources().getColor(winningColorID));
-
                 }
 
                 if (attackHighPosition1 == 1 && defenseLowPosition == 0) {
                     line1to0.setAlpha(1);
                     line1to0.setBackgroundColor(getResources().getColor(winningColorID));
-
                 }
                 if (attackHighPosition1 == 1 && defenseLowPosition == 1) {
                     line1to1.setAlpha(1);
@@ -742,7 +759,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         gamePhaseTextView.setText(boardModel.getCurrentGamePhase());
         gamePhaseTextView.setGravity(Gravity.CENTER);
         turnPhaseTextView.setText(boardModel.getCurrentPhase());
-        turnPhaseTextView.setGravity(Gravity.CENTER);
+        textView0.setGravity(Gravity.CENTER);
+        textView1.setGravity(Gravity.CENTER);
+
         hideAttackUI();
         boardModel.setCurrentPlayerTurn(boardModel.randomizePlayer());
         unitPlacementCounterTextView.setText(Integer.toString(unitPlacementCounter));
@@ -759,7 +778,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         firstReinforceOfTurn = true;
         boardModel.setCurrentPhase("Reinforce");
         turnPhaseTextView.setText(boardModel.getCurrentPhase());
-        turnPhaseTextView.setGravity(Gravity.CENTER);
+        textView0.setGravity(Gravity.CENTER);
+        textView1.setGravity(Gravity.CENTER);
+
 
     }
 
@@ -812,10 +833,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Region localRegion = boardModel.getRegionFromView(v);
 
         if (boardModel.getCurrentGamePhase().equals("Setup")) {
-            setup(localRegion);
+            //make sure they only place one unit
+            if (setupFirstPlacement) {
+                setup(localRegion);
+                setupFirstPlacement = false;
+            }
         }
         else if (boardModel.getCurrentGamePhase().equals("Place")) {
-            setup(localRegion);
+            if (setupFirstPlacement) {
+                setup(localRegion);
+                setupFirstPlacement = false;
+            }
         }
 
         //else game phase is play phase
@@ -988,17 +1016,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setup(Region localRegion) {
-
-
-        if (localRegion.getUnitCount() == 0) {
-            localRegion.setColorControl(boardModel.getCurrentPlayerTurn());
-            localRegion.setTextColor(localRegion.getColorControl());
-            boardModel.increaseUnitCountByOne(localRegion);
-            updateUI();
-            unitPlacementCounter--;
-            unitPlacementCounterTextView.setText(Integer.toString(unitPlacementCounter));
+        if (boardModel.getCurrentGamePhase().equals("Setup")) {
+            //place a single unit onto a blank space
+            if (localRegion.getUnitCount() == 0) {
+                localRegion.setColorControl(boardModel.getCurrentPlayerTurn());
+                localRegion.setTextColor(localRegion.getColorControl());
+                boardModel.increaseUnitCountByOne(localRegion);
+                updateUI();
+                unitPlacementCounter--;
+                unitPlacementCounterTextView.setText(Integer.toString(unitPlacementCounter));
+            }
         }
-        else {
+
+        if (boardModel.getCurrentGamePhase().equals("Place")) {
+            //place unit onto spot that is already occupied
             if (localRegion.getColorControl() == boardModel.getCurrentPlayerTurn()) {
                 boardModel.increaseUnitCountByOne(localRegion);
                 updateUI();
@@ -1007,9 +1038,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         }
-
-
-
     }
 
     private void attack(Region localRegion) {
@@ -1147,7 +1175,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 localTextView.setTextColor(getResources().getColor(R.color.white));
             }
             if (localRegion.getTextColor() == 's') {
-                localTextView.setTextColor(getResources().getColor(R.color.silver));
+                localTextView.setTextColor(getResources().getColor(R.color.white));
             }
             //set unit count
             localTextView.setText(Integer.toString(localRegion.getUnitCount()));

@@ -767,10 +767,10 @@
 
     <ImageView
         android:id="@+id/current_player_graphic"
-        android:layout_width="94dp"
-        android:layout_height="75dp"
-        android:layout_marginStart="268dp"
-        android:layout_marginTop="140dp"
+        android:layout_width="106dp"
+        android:layout_height="98dp"
+        android:layout_marginStart="265dp"
+        android:layout_marginTop="125dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/turn_changer_circle_blue" />
@@ -807,16 +807,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/turn_phase_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="288dp"
-        android:layout_marginTop="164dp"
-        android:text="TextView"
-        android:textColor="#FFFFFF"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/unit_place_counter_text_view"
@@ -827,5 +817,35 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+
+    <TextSwitcher
+
+        android:id="@+id/turn_phase_text_view"
+        android:layout_width="70dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="283dp"
+        android:layout_marginTop="160dp"
+        android:background="@color/white"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/text_view_0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="#000000" />
+
+        <TextView
+            android:id="@+id/text_view_1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="#000000" />
+    </TextSwitcher>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
