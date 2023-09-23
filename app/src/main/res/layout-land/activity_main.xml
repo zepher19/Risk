@@ -767,54 +767,13 @@
 
     <ImageView
         android:id="@+id/current_player_graphic"
-        android:layout_width="70dp"
-        android:layout_height="60dp"
-        android:layout_marginStart="288dp"
-        android:layout_marginTop="162dp"
-        android:background="@color/blue"
+        android:layout_width="94dp"
+        android:layout_height="75dp"
+        android:layout_marginStart="268dp"
+        android:layout_marginTop="140dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/change_phase_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="316dp"
-        android:layout_marginTop="308dp"
-        android:text="Change Phase"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/phase_text_view"
-        android:layout_width="77dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="544dp"
-        android:layout_marginTop="320dp"
-        android:text="TextView"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/gamePhase"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="736dp"
-        android:layout_marginTop="210dp"
-        android:text="Game Phase"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/game_phase_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="792dp"
-        android:layout_marginTop="171dp"
-        android:text="TextView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/turn_changer_circle_blue" />
 
     <Button
         android:id="@+id/end_attack_button"
@@ -823,6 +782,49 @@
         android:layout_marginStart="146dp"
         android:layout_marginTop="312dp"
         android:text="End"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="296dp"
+        android:layout_marginTop="324dp"
+        android:text="@string/bonuses"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/game_phase_text_view"
+        android:layout_width="152dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="356dp"
+        android:layout_marginTop="4dp"
+        android:text="Setup"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        android:textColor="@color/red"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/turn_phase_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="288dp"
+        android:layout_marginTop="164dp"
+        android:text="TextView"
+        android:textColor="#FFFFFF"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/unit_place_counter_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="504dp"
+        android:layout_marginTop="4dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

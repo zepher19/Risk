@@ -6,9 +6,8 @@ import java.util.Random;
 
 public class BoardModel {
 
-    private final String[] turnPhases = {"Reinforce", "Attack", "Fortify"};
+    //start on fortify so when it switches in first turn it lands on reinforce
     private String currentPhase = "Reinforce";
-
 
     private final String[] gamePhases = {"Setup", "Play"};
     private String currentGamePhase = "Setup";
@@ -257,6 +256,9 @@ public class BoardModel {
         return currentPhase;
     }
 
+    public void setCurrentPhase(String currentPhase) {
+        this.currentPhase = currentPhase;
+    }
 
     public void setCurrentGamePhase(String currentGamePhase) {
         this.currentGamePhase = currentGamePhase;
@@ -369,5 +371,19 @@ public class BoardModel {
             }
         }
 
+    }
+
+    public void switchCurrentPhase() {
+        if (currentPhase.equals("Reinforce")) {
+            currentPhase = "Attack";
+            return;
+        }
+        if (currentPhase.equals("Attack")) {
+            currentPhase = "Fortify";
+            return;
+        }
+        if (currentPhase.equals("Fortify")) {
+            currentPhase = "Reinforce";
+        }
     }
 }

@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Risk</string>
     <string name="zero">0</string>
+    <string name="bonuses">N. America 5 | S.America 2 | Europe 5 | Africa 3 | Asia 7 | Australia 2</string>
+
+
 
 
 </resources>

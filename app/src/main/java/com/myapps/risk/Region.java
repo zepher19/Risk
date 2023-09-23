@@ -2,6 +2,7 @@ package com.myapps.risk;
 
 public class Region {
 
+
     private Region[] connected;
     private int viewID;
     private char colorControl;
@@ -12,6 +13,7 @@ public class Region {
 
     public Region(int viewID) {
         this.viewID = viewID;
+        colorControl = '0';
     }
 
 
