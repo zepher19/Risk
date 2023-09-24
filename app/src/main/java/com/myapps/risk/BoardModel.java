@@ -1,5 +1,6 @@
 package com.myapps.risk;
 
+import android.util.Log;
 import android.view.View;
 
 import java.util.Random;
@@ -288,6 +289,7 @@ public class BoardModel {
                 controlledRegions++;
             }
         }
+        Log.d("controlled regions", "controlled regions " + Integer.toString(controlledRegions));
         return controlledRegions;
     }
 

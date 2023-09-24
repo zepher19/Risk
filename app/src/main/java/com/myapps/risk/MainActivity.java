@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     TextView attackResult, defenseResult;
 
-    int intAttackResult, intDefenseResult;
+    int intAttackResult = 0, intDefenseResult = 0;
 
     Button roll;
 
@@ -74,15 +74,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     boolean firstReinforceOfTurn = true;
 
-    String occupyNumberString, fortifyNumberString;
-    boolean placedSetupPiece = false;
+    String occupyNumberString = "-5", fortifyNumberString = "-5";
 
 
     TextView gamePhaseTextView, unitPlacementCounterTextView;
 
     TextSwitcher turnPhaseTextView;
 
-    boolean setupFirstPlacement = true;
+    boolean setupFirstPlacement = true, firstFortify = true;
+
+    TextView reinforcement_counter_text_view;
+
 
 
     @Override
@@ -93,10 +95,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         boardModel = BoardModel.getInstance();
 
+        reinforcement_counter_text_view = findViewById(R.id.reinforcement_count_text_view);
+        reinforcement_counter_text_view.setAlpha(0);
+
         unitPlacementCounterTextView = findViewById(R.id.unit_place_counter_text_view);
 
         gamePhaseTextView = findViewById(R.id.game_phase_text_view);
         turnPhaseTextView = findViewById(R.id.turn_phase_text_view);
+        turnPhaseTextView.setInAnimation(getApplicationContext(), android.R.anim.slide_in_left);
+        turnPhaseTextView.setOutAnimation(getApplicationContext(), android.R.anim.slide_out_right);
         turnPhaseTextView.setAlpha(0);
         textView0 = findViewById(R.id.text_view_0);
         textView1 = findViewById(R.id.text_view_1);
@@ -131,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //setup first placement needs to be false to ensure the previous player set a unit down
                     if (!setupFirstPlacement) {
                         //if there are blank spots
-                        if (scanForBlankSpots()) {
+                        if (unitPlacementCounter != 78) {
                             boardModel.switchPlayerTurn();
                             updateCurrentPlayerGraphic();
                             setupFirstPlacement = true;
@@ -152,13 +159,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 else if (boardModel.getCurrentGamePhase().equals("Place")) {
                     //setup first placement needs to be false to ensure the previous player set a unit down
                     if (!setupFirstPlacement) {
-                        if (scanForNumUnits()) {
+                        //if there are still units to place, place them
+                        if (unitPlacementCounter != 0) {
                             boardModel.switchPlayerTurn();
                             updateCurrentPlayerGraphic();
                             setupFirstPlacement = true;
-
-                        } else {
+                        }
+                        //if all units have been placed, switch to play mode
+                        else {
                             boardModel.setCurrentGamePhase("Play");
+                            calculateReinforcements();
                             turnPhaseTextView.setAlpha(1);
                             gamePhaseTextView.setAlpha(0);
                             unitPlacementCounterTextView.setAlpha(0);
@@ -171,19 +181,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 //if in play
                 else {
+                    fortifyUnhighlight();
+                    unhighlight();
                     //if fortify pressing the button sends you into the next turn
                     if (boardModel.getCurrentPhase().equals("Fortify")) {
                         startTurn();
                     }
                     //if not in fortify pressing the button sends you to next phase
                     else {
+                        if(boardModel.getCurrentPhase().equals("Reinforce")) {
+                            reinforcement_counter_text_view.setAlpha(0);
+                            reinforcement_counter_text_view.setGravity(Gravity.CENTER);
+                        }
                         boardModel.switchCurrentPhase();
                         turnPhaseTextView.setText(boardModel.getCurrentPhase());
                         textView0.setGravity(Gravity.CENTER);
                         textView1.setGravity(Gravity.CENTER);
-
                     }
-
                 }
             }
         });
@@ -214,7 +228,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         roll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //first hide any lines
+
+                //attacker must have at least 3 units to prevent running out during combat
+                if (attacker.getUnitCount() <= 3) {
+                    Toast.makeText(MainActivity.this, "Must have at least 3 units to attack.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+
+                //first hide any lines from previous combat
                 line0to0.setAlpha(0);
                 line0to1.setAlpha(0);
 
@@ -639,6 +661,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void calculateReinforcements() {
+        reinforcements = boardModel.countControlledRegions() / 3;
+
+        //determine continent bonus if applicable
+        boardModel.getContinentBonus();
+
+        if (boardModel.northAmericaBonus) {
+            reinforcements = reinforcements + boardModel.NORTH_AMERICA_BONUS_VALUE;
+        }
+        if (boardModel.southAmericaBonus) {
+            reinforcements = reinforcements + boardModel.SOUTH_AMERICA_BONUS_VALUE;
+        }
+        if (boardModel.europeBonus) {
+            reinforcements = reinforcements + boardModel.EUROPE_BONUS_VALUE;
+        }
+        if (boardModel.africaBonus) {
+            reinforcements = reinforcements + boardModel.AFRICA_BONUS_VALUE;
+        }
+        if (boardModel.asiaBonus) {
+            reinforcements = reinforcements + boardModel.ASIA_BONUS_VALUE;
+        }
+        if (boardModel.australiaBonus) {
+            reinforcements = reinforcements + boardModel.AUSTRALIA_BONUS_VALUE;
+        }
+
+        firstReinforceOfTurn = false;
+
+        //only show reinforcement counter during play phase
+        if (boardModel.getCurrentGamePhase().equals("Play")) {
+            reinforcement_counter_text_view.setText(Integer.toString(reinforcements));
+            reinforcement_counter_text_view.setAlpha(1);
+            reinforcement_counter_text_view.setGravity(Gravity.CENTER);
+        }
+    }
+
     private boolean scanForNumUnits() {
         int counter = 0;
         for (int i = 0; i < boardModel.getRegionArray().length; i++) {
@@ -674,7 +731,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //prevent negative unit counts
         if (attackCountAfterLoss <= 1) {
             attackCountAfterLoss = 1;
-            return;
         }
 
         //if defender count is zero move attacker forces in and occupy
@@ -708,6 +764,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //create edit text for player to enter number of troops to move
         EditText editText = new EditText(this);
+        editText.setHint("1 to " + Integer.toString(attacker.getUnitCount() - 1));
 
         //to only allow numbers to be entered
         editText.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -717,6 +774,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //reset value to default
+                occupyNumberString = "-5";
                 occupyNumberString = s.toString();
             }
             @Override
@@ -726,10 +785,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         builder.setView(editText);
 
-
-
         builder.setNegativeButton("Done", (DialogInterface.OnClickListener) (dialog, which) -> {
-            // If user click no then dialog box is canceled.
             occupyNumber = Integer.parseInt(occupyNumberString);
             if (occupyNumber > 0 && occupyNumber < attacker.getUnitCount()) {
                 dialog.cancel();
@@ -747,6 +803,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 occupy();
             }
         });
+
+
 
         // Create the Alert dialog
         AlertDialog alertDialog = builder.create();
@@ -775,7 +833,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // instead of on randomize
         boardModel.switchPlayerTurn();
         updateCurrentPlayerGraphic();
+        calculateReinforcements();
         firstReinforceOfTurn = true;
+        firstFortify = true;
+        fortifyNumberString = "-5";
+        occupyNumberString = "-5";
         boardModel.setCurrentPhase("Reinforce");
         turnPhaseTextView.setText(boardModel.getCurrentPhase());
         textView0.setGravity(Gravity.CENTER);
@@ -828,27 +890,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
-
         //create local region from the view
         Region localRegion = boardModel.getRegionFromView(v);
 
         if (boardModel.getCurrentGamePhase().equals("Setup")) {
-            //make sure they only place one unit
-            if (setupFirstPlacement) {
-                setup(localRegion);
-                setupFirstPlacement = false;
+            if (localRegion.getColorControl() == '0') {
+                //make sure they only place one unit
+                if (setupFirstPlacement) {
+                    setup(localRegion);
+                    setupFirstPlacement = false;
+                }
             }
         }
+
+        //to do might need to remove the check for player color
         else if (boardModel.getCurrentGamePhase().equals("Place")) {
-            if (setupFirstPlacement) {
-                setup(localRegion);
-                setupFirstPlacement = false;
+            if (localRegion.getColorControl() == boardModel.getCurrentPlayerTurn()) {
+                if (setupFirstPlacement) {
+                    setup(localRegion);
+                    setupFirstPlacement = false;
+                }
             }
         }
+
 
         //else game phase is play phase
         else {
-
 
             if (boardModel.getCurrentPhase().equals("Reinforce")) {
                 if (localRegion.getColorControl() == boardModel.getCurrentPlayerTurn()) {
@@ -858,7 +925,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
             if (boardModel.getCurrentPhase().equals("Attack")) {
-                //if the spot is highlighted and the attacker has enough units to attack, attack
+
+
+                //if the spot is highlighted
                 if (localRegion.getTextColor() == 'w') {
                     attack(localRegion);
                     //return is necessary
@@ -870,69 +939,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 //highlight if player turn is same as controlling player
                 if (localRegion.getColorControl() == boardModel.getCurrentPlayerTurn()) {
-                    highlight(localRegion);
                     attacker = localRegion;
+                    //must have at least 3 units to attack
+                    if (attacker.getUnitCount() < 3) {
+                        Toast.makeText(this, "Must have at least 3 units to attack.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    highlight(localRegion);
                 }
             }
 
 
             //if fortifying
             if (boardModel.getCurrentPhase().equals("Fortify")) {
-                //if the spot is highlighted for fortifying, fortify
-                if (localRegion.getTextColor() == 's') {
-                    fortify(localRegion);
-                    //return is necessary
-                    return;
-                }
 
-                //highlight if player turn is same as controlling player
-                if (localRegion.getColorControl() == boardModel.getCurrentPlayerTurn()) {
-                    fortifyHighlight(localRegion);
-                    fortifier = localRegion;
-                }
-                else {
-                    fortifyUnhighlight();
+                if (firstFortify) {
+
+                    //if the spot is highlighted for fortifying, fortify
+                    if (localRegion.getTextColor() == 's') {
+                        fortify(localRegion);
+                        //return is necessary
+                        firstFortify = false;
+                        return;
+                    }
+
+
+                    //highlight if player turn is same as controlling player
+                    if (localRegion.getColorControl() == boardModel.getCurrentPlayerTurn()) {
+                        fortifier = localRegion;
+                        //need 2 units to fortify
+                        if (fortifier.getUnitCount() < 2) {
+                            Toast.makeText(this, "You must have at least 2 units to fortify.", Toast.LENGTH_SHORT).show();
+                            //return to prevent highlighting
+                            return;
+                        }
+                        fortifyHighlight(localRegion);
+                    } else {
+                        fortifyUnhighlight();
+                    }
                 }
             }
         }
     }
 
     private void reinforce(Region localRegion) {
-        //only calculate reinforcements the first time
-        if (firstReinforceOfTurn) {
-            reinforcements = boardModel.countControlledRegions() / 3;
-
-
-            //determine continent bonus if applicable
-            boardModel.getContinentBonus();
-
-            if (boardModel.northAmericaBonus) {
-                reinforcements = reinforcements + boardModel.NORTH_AMERICA_BONUS_VALUE;
-            }
-            if (boardModel.southAmericaBonus) {
-                reinforcements = reinforcements + boardModel.SOUTH_AMERICA_BONUS_VALUE;
-            }
-            if (boardModel.europeBonus) {
-                reinforcements = reinforcements + boardModel.EUROPE_BONUS_VALUE;
-            }
-            if (boardModel.africaBonus) {
-                reinforcements = reinforcements + boardModel.AFRICA_BONUS_VALUE;
-            }
-            if (boardModel.asiaBonus) {
-                reinforcements = reinforcements + boardModel.ASIA_BONUS_VALUE;
-            }
-            if (boardModel.australiaBonus) {
-                reinforcements = reinforcements + boardModel.AUSTRALIA_BONUS_VALUE;
-            }
-
-            firstReinforceOfTurn = false;
-            Toast.makeText(this, Integer.toString(reinforcements), Toast.LENGTH_SHORT).show();
-        }
-
         if (reinforcements > 0) {
             localRegion.setUnitCount(localRegion.getUnitCount() + 1);
             updateUI();
             reinforcements--;
+            reinforcement_counter_text_view.setText(Integer.toString(reinforcements));
+            reinforcement_counter_text_view.setGravity(Gravity.CENTER);
         }
     }
 
@@ -963,6 +1019,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //create edit text for player to enter number of troops to move
         EditText editText = new EditText(this);
+        editText.setHint("1 to " + Integer.toString(fortifier.getUnitCount() - 1));
 
         //to only allow numbers to be entered
         editText.setInputType(InputType.TYPE_CLASS_NUMBER);
@@ -972,6 +1029,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                fortifyNumberString = "-5";
                 fortifyNumberString = s.toString();
             }
             @Override
@@ -1042,7 +1100,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void attack(Region localRegion) {
         //check to see if player has enough units to attack
-        if (attacker.getUnitCount() > 2) {
             defender = localRegion;
             attacking = true;
             showAttackUI();
@@ -1052,11 +1109,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             attacker.setTextColor('r');
             defender.setTextColor('w');
             updateUI();
-        }
-        else {
-            Toast.makeText(this, "You must have at least 3 units in a territory to attack.", Toast.LENGTH_SHORT).show();
-            unhighlight();
-        }
     }
 
     private void showAttackUI() {
