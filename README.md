@@ -2,7 +2,15 @@ Hello there!
 
 I'm currently looking for a coding job, so I decided to create a Risk board game app to showcase my Java language competency.
 
-Here's some pictures: (from left to right, icon on the homescreen, splash screen, game in progress)
+Here's some pictures: (from left to right, icon on the homescreen, empty game board, game in progress)
+
+![risk1](https://github.com/zepher19/Risk/assets/108103331/f8240d61-aced-42dc-b29b-e177ecf4a17c) ![risk2](https://github.com/zepher19/Risk/assets/108103331/afd3bf4c-a588-4c51-a6c9-295e0e34dc95) ![risk3](https://github.com/zepher19/Risk/assets/108103331/98798669-2924-4d39-815d-823e9c15798a)
+
+
+
+
+
+
 
 And here is the video link if you'd like to see the game in action:
 
