@@ -9,6 +9,11 @@ import java.util.Random;
 public class BoardModel {
 
 
+    Character blue = 'b', orange = 'o', purple = 'p', green = 'g';
+    boolean blueDefeated = false, orangeDefeated = false, purpleDefeated = false, greenDefeated = false;
+
+    private Character playerToRemove;
+
     private String currentPhase = "Reinforce";
 
     private String currentGamePhase = "Setup";
@@ -376,6 +381,23 @@ public class BoardModel {
         }
         if (currentPhase.equals("Fortify")) {
             currentPhase = "Reinforce";
+        }
+    }
+
+    public void removePlayer() {
+        //attempt all removes, in case more than one person is defeated in one round
+
+        if (blueDefeated) {
+            playerTurns.remove(blue);
+        }
+        if (orangeDefeated) {
+            playerTurns.remove(orange);
+        }
+        if (purpleDefeated) {
+            playerTurns.remove(purple);
+        }
+        if (greenDefeated) {
+            playerTurns.remove(green);
         }
     }
 }

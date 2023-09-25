@@ -105,9 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         endAttack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                hideAttackUI();
-                unhighlight();
-                attacking = false;
+                endAttacking();
             }
         });
 
@@ -160,12 +158,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //if all units have been placed, switch to play mode
                         else {
                             boardModel.setCurrentGamePhase("Play");
-                            calculateReinforcements();
+                            //turn on and off the various UI elements
                             turnPhaseTextView.setAlpha(1);
                             gamePhaseTextView.setAlpha(0);
                             unitPlacementCounterTextView.setAlpha(0);
-                            boardModel.switchPlayerTurn();
-                            updateCurrentPlayerGraphic();
+
+                            startTurn();
+
                         }
                     }
                 }
@@ -185,6 +184,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             reinforcement_counter_text_view.setAlpha(0);
                             reinforcement_counter_text_view.setGravity(Gravity.CENTER);
                         }
+                        //clear attack UI if player left it up
+                        endAttacking();
+                        //remove players if players defeated
+                        //remove player operation needs to be outside of occupy, causes concurrency problem
+                        boardModel.removePlayer();
+                        //check if game is over if only one player left
+                        isGameOver();
+
                         boardModel.switchCurrentPhase();
                         turnPhaseTextView.setText(boardModel.getCurrentPhase());
                         textView0.setGravity(Gravity.CENTER);
@@ -222,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onClick(View v) {
 
                 //attacker must have at least 3 units to prevent running out during combat
-                if (attacker.getUnitCount() <= 3) {
+                if (attacker.getUnitCount() < 3) {
                     Toast.makeText(MainActivity.this, "Must have at least 3 units to attack.", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -653,6 +660,59 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void endAttacking() {
+        hideAttackUI();
+        unhighlight();
+        attacking = false;
+    }
+
+    private void isGameOver() {
+        if (boardModel.playerTurns.size() == 1) {
+            String winner = "Everyone";
+
+            if (boardModel.playerTurns.get(0) == 'b') {
+                winner = "Blue";
+            }
+            if (boardModel.playerTurns.get(0) == 'o') {
+                winner = "Orange";
+            }
+            if (boardModel.playerTurns.get(0) == 'p') {
+                winner = "Purple";
+            }
+            if (boardModel.playerTurns.get(0) == 'g') {
+                winner = "Green";
+            }
+
+
+            // Create the object of AlertDialog Builder class
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            // Set the message show for the Alert time
+            builder.setMessage(winner + " wins!");
+
+            // Set Alert Title
+            builder.setTitle("Game Over");
+
+            // Set Cancelable false for when the user clicks on the outside the Dialog Box then it will remain show
+            builder.setCancelable(false);
+
+
+            // Create the Alert dialog
+            AlertDialog alertDialog = builder.create();
+            // Show the Alert Dialog box
+            alertDialog.show();
+
+
+
+
+
+
+
+
+
+        }
+    }
+
     private void calculateReinforcements() {
         reinforcements = boardModel.countControlledRegions() / 3;
 
@@ -740,6 +800,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         updateUI();
     }
 
+    private void checkIfPlayerDefeated() {
+        int blueCounter = 0;
+        int orangeCounter = 0;
+        int purpleCounter = 0;
+        int greenCounter = 0;
+
+        for (int i = 0; i < boardModel.getRegionArray().length; i++) {
+            if (boardModel.getRegionArray()[i].getColorControl() == 'b') {
+                blueCounter++;
+            }
+            if (boardModel.getRegionArray()[i].getColorControl() == 'o') {
+                orangeCounter++;
+            }
+            if (boardModel.getRegionArray()[i].getColorControl() == 'p') {
+                purpleCounter++;
+            }
+            if (boardModel.getRegionArray()[i].getColorControl() == 'g') {
+                greenCounter++;
+            }
+        }
+
+        if (blueCounter == 0) {
+            if (!boardModel.blueDefeated) {
+                Toast.makeText(this, "Blue has been defeated!", Toast.LENGTH_SHORT).show();
+                boardModel.blueDefeated = true;
+            }
+        }
+        if (orangeCounter == 0) {
+            if (!boardModel.orangeDefeated) {
+                Toast.makeText(this, "Orange has been defeated!", Toast.LENGTH_SHORT).show();
+                boardModel.orangeDefeated = true;
+
+            }
+        }
+        if (purpleCounter == 0) {
+            if (!boardModel.purpleDefeated) {
+                Toast.makeText(this, "Purple has been defeated!", Toast.LENGTH_SHORT).show();
+                boardModel.purpleDefeated = true;
+            }
+        }
+        if (greenCounter == 0) {
+            if (!boardModel.greenDefeated) {
+                Toast.makeText(this, "Green has been defeated!", Toast.LENGTH_SHORT).show();
+                boardModel.greenDefeated = true;
+            }
+        }
+    }
+
     private void occupy() {
         // Create the object of AlertDialog Builder class
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -789,6 +897,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 hideAttackUI();
                 updateUI();
                 attacking = false;
+                checkIfPlayerDefeated();
             }
             else {
                 Toast.makeText(this, "Value must be in range", Toast.LENGTH_SHORT).show();
