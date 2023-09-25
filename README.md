@@ -10,11 +10,8 @@ Here's some pictures: (from top to bottom, icon on the homescreen, empty game bo
 
 
 
-
-
-
-
 And here is the video link if you'd like to see the game in action:
+https://www.youtube.com/watch?v=-LCDTMwdIXQ&ab_channel=Zepher319
 
 
 Note:
