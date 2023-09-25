@@ -3,11 +3,12 @@ package com.myapps.risk;
 import android.util.Log;
 import android.view.View;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class BoardModel {
 
-    //start on fortify so when it switches in first turn it lands on reinforce
+
     private String currentPhase = "Reinforce";
 
     private String currentGamePhase = "Setup";
@@ -26,15 +27,8 @@ public class BoardModel {
 
 
 
-    boolean northAmericaBonus = false;
-    boolean southAmericaBonus = false;
-    boolean europeBonus = false;
-    boolean africaBonus = false;
-    boolean asiaBonus = false;
-    boolean australiaBonus = false;
-
-
-
+    //continent bonus variables
+    boolean northAmericaBonus = false, southAmericaBonus = false, europeBonus = false, africaBonus = false, asiaBonus = false, australiaBonus = false;
     final int NORTH_AMERICA_BONUS_VALUE = 5;
     final int SOUTH_AMERICA_BONUS_VALUE = 2;
     final int EUROPE_BONUS_VALUE = 5;
@@ -44,19 +38,22 @@ public class BoardModel {
 
 
 
-
-
-
-
-
     private char currentPlayerTurn;
+    ArrayList<Character> playerTurns = new ArrayList<>();
 
-    private final char[] players = {'b', 'o', 'p', 'g'};
+
 
     private static final BoardModel instance = new BoardModel();
 
     // private constructor to avoid client applications using the constructor
     private BoardModel(){
+
+        //create turn array list
+        playerTurns.add('b');
+        playerTurns.add('o');
+        playerTurns.add('p');
+        playerTurns.add('g');
+
 
         //initialize all regions with View ID
         Region alaskaReg = new Region(R.id.alaska);
@@ -204,7 +201,7 @@ public class BoardModel {
 
     char randomizePlayer() {
         Random random = new Random();
-        return players[random.nextInt(4)];
+        return playerTurns.get(random.nextInt(4));
     }
 
     public void setCurrentPlayerTurn(char currentPlayerTurn) {
@@ -216,21 +213,16 @@ public class BoardModel {
     }
 
     void switchPlayerTurn()  {
-        if (currentPlayerTurn == 'b') {
-            currentPlayerTurn = 'o';
-            return;
+        //find current turn index
+        int index = playerTurns.indexOf(currentPlayerTurn);
+        //move to next turn
+        index++;
+        //if index is greater than size - 1 then move back to index 0
+        if (index > playerTurns.size() - 1) {
+            index = 0;
         }
-        if (currentPlayerTurn == 'o') {
-            currentPlayerTurn = 'p';
-            return;
-        }
-        if (currentPlayerTurn == 'p') {
-            currentPlayerTurn = 'g';
-            return;
-        }
-        if (currentPlayerTurn == 'g') {
-            currentPlayerTurn = 'b';
-        }
+        //set new player turn
+        currentPlayerTurn = playerTurns.get(index);
     }
 
 

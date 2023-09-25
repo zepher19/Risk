@@ -54,9 +54,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView textView0, textView1;
 
 
-    Region fortifier;
-    Region attacker;
-    Region defender;
+    Region fortifier, attacker, defender;
 
     boolean attacking = false;
 
