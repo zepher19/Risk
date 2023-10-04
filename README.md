@@ -4,7 +4,11 @@ I'm currently looking for a coding job, so I decided to create a Risk board game
 
 Here's some pictures: (from top to bottom, icon on the homescreen, empty game board, game in progress)
 
-![Screenshot_20230925-124236](https://github.com/zepher19/Risk/assets/108103331/bd82d6a0-8495-45e2-b8e2-e138973d7f1a)
+![risk1](https://github.com/zepher19/Risk/assets/108103331/8508636a-0976-4970-80ac-ab97b762f47b)
+![risk2](https://github.com/zepher19/Risk/assets/108103331/c8991bf5-0ed0-42e5-a881-6fb0bdb002df)
+![risk3](https://github.com/zepher19/Risk/assets/108103331/f0852645-126f-4b1f-af86-bdaeacdeff34)
+
+
 
 
 
