@@ -5,6 +5,7 @@ I'm currently looking for a coding job, so I decided to create a Risk board game
 Here's some pictures: (from top to bottom, icon on the homescreen, empty game board, game in progress)
 
 ![risk1](https://github.com/zepher19/Risk/assets/108103331/8508636a-0976-4970-80ac-ab97b762f47b)
+
 ![risk2](https://github.com/zepher19/Risk/assets/108103331/0e912afd-0a70-4572-a576-98fdade7397b)
 ![risk3](https://github.com/zepher19/Risk/assets/108103331/f35f5216-4ff3-4f45-8870-37f938b6100d)
 
